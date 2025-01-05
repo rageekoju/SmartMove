@@ -1,4 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
+using MudBlazor.Services;
+using SmartMove.Service;
+using SmartMove.Service.Interface;
 
 namespace SmartMove
 {
@@ -19,6 +22,9 @@ namespace SmartMove
 #if DEBUG
     		builder.Services.AddBlazorWebViewDeveloperTools();
     		builder.Logging.AddDebug();
+            builder.Services.AddMudServices();
+            builder.Services.AddScoped<IUserInterface, UserService>();
+
 #endif
 
             return builder.Build();

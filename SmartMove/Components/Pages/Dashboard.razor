@@ -1,0 +1,132 @@
+﻿@page "/dashboard"
+
+<style>
+    .dashboard-card {
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .chart-container {
+        height: 300px;
+    }
+
+    .transaction-list {
+        margin-top: 20px;
+    }
+
+    .transaction-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+    }
+</style>
+
+<div class="container mt-4">
+    <h3 style="color:green">Available Balance = NRS 40,00000</h3>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="dashboard-card bg-success text-white text-center">
+                <h5>Total Inflows</h5>
+                <h2>@totalIncome</h2>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dashboard-card bg-danger text-white text-center">
+                <h5>Total Outflows</h5>
+                <h2>55668</h2>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dashboard-card bg-warning text-white text-center">
+                <h5>Total Debt</h5>
+                <h2>45879</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-end mb-3">
+        <button class="btn btn-primary" @onclick="OpenModal">Add Transaction</button>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="dashboard-card">
+                <h5>Financial Overview</h5>
+                <div class="chart-container">
+                    <p>TASK NO 4: ***Please add some charts here everyone!***</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="dashboard-card">
+                <h5>Top Transactions</h5>
+                @*TASK NO 3: Need From and to dates selector to filter data in transactions to show below*@
+                <div class="transaction-list">
+                    @foreach (var transaction in transactions)
+                    {
+                        <div class="transaction-item">
+                            <span>@transaction.Description</span>
+                            <span>@transaction.Date.ToString("yyyy-MM-dd")</span>
+                            <span>@transaction.Amount.ToString()</span>
+                            <span class="@(transaction.Type == "Income" ? "text-success" : "text-danger")">@transaction.Type</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Modal for Adding Transaction *@
+@if (showModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Transaction</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label>Description</label>
+                        <input type="text" class="form-control" @bind="newTransaction.Description" />
+                    </div>
+                    <div class="mb-3">
+                        <label>Date</label>
+                        <input type="date" class="form-control" @bind="newTransaction.Date" />
+                    </div>
+                    <div class="mb-3">
+                        <label>Amount</label>
+                        <input type="number" class="form-control" @bind="newTransaction.Amount" />
+                    </div>
+                    <div class="mb-3">
+                        <label>Type</label>
+                        <select class="form-control" @bind="newTransaction.Type">
+                            <option value=""></option>
+                            <option value="Income">Income</option>
+                            <option value="Expense">Expense</option>
+                            <option value="Debt">Debt</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Close</button>
+                    <button type="button" class="btn btn-primary" @onclick="AddTransaction">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+
