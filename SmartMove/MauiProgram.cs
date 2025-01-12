@@ -1,7 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
 using MudBlazor.Services;
+using SmartMove.Abstraction;
+using SmartMove.Interfaces;
 using SmartMove.Service;
 using SmartMove.Service.Interface;
+using SmartMove.Services;
 
 namespace SmartMove
 {
@@ -24,6 +27,8 @@ namespace SmartMove
     		builder.Logging.AddDebug();
             builder.Services.AddMudServices();
             builder.Services.AddScoped<IUserInterface, UserService>();
+            builder.Services.AddScoped<IDashboardInterface, DashboardService>();
+            builder.Services.AddScoped < TransactionService>();
 
 #endif
 

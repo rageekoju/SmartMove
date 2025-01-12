@@ -1,132 +1,185 @@
 ﻿@page "/dashboard"
+@using SmartMove.Components.Layout
 
-<style>
-    .dashboard-card {
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        padding: 20px;
-        margin-bottom: 20px;
-    }
+<div class="dashboard-wrapper">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h1>Smart Move</h1>
+        <ul>
+            <li><a href="/dashboard">Dashboard</a></li>
+            <li><a href="/transactions">Transaction</a></li>
+            <li><a href="/debts">Debts</a></li>
+            <li><a href="/reports">Reports</a></li>
+            <li><a href="/profile">My Profile</a></li>
+        </ul>
+    </div>
 
-    .dashboard-header {
-        display: flex;
-        justify-content: space-between;
-    }
+    <!-- Main Content -->
+    <div class="dashboard-content">
+        <div class="dashboard-header">
+            <h3>Balance: NRS @(totalIncome - totalExpense + totalDebt)</h3>
+            <div class="date-filter">
+                <label for="fromDate">From:</label>
+                <input type="date" id="fromDate" />
+                <label for="toDate">To:</label>
+                <input type="date" id="toDate" />
+            </div>
+        </div>
 
-    .chart-container {
-        height: 300px;
-    }
-
-    .transaction-list {
-        margin-top: 20px;
-    }
-
-    .transaction-item {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px 0;
-        border-bottom: 1px solid #eee;
-    }
-</style>
-
-<div class="container mt-4">
-    <h3 style="color:green">Available Balance = NRS 40,00000</h3>
-
-    <div class="row">
-        <div class="col-md-4">
-            <div class="dashboard-card bg-success text-white text-center">
+        <!-- Card Container -->
+        <div class="card-container">
+            <div class="dashboard-card bg-success text-white">
                 <h5>Total Inflows</h5>
                 <h2>@totalIncome</h2>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="dashboard-card bg-danger text-white text-center">
+            <div class="dashboard-card bg-danger text-white">
                 <h5>Total Outflows</h5>
-                <h2>55668</h2>
+                <h2>@totalExpense</h2>
+            </div>
+            <div class="dashboard-card bg-warning text-dark">
+                <h5>Debts</h5>
+                <h2>@totalDebt</h2>
+            </div>
+            <div class="dashboard-card bg-info text-white">
+                <h5>Cleared Debts</h5>
+                <h2>@clearedDebts</h2>
+            </div>
+            <div class="dashboard-card bg-secondary text-white">
+                <h5>Pending Debts</h5>
+                <h2>@pendingDebts</h2>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="dashboard-card bg-warning text-white text-center">
-                <h5>Total Debt</h5>
-                <h2>45879</h2>
-            </div>
-        </div>
-    </div>
 
-    <div class="d-flex justify-content-end mb-3">
-        <button class="btn btn-primary" @onclick="OpenModal">Add Transaction</button>
-    </div>
-
-    <div class="row">
-        <div class="col-md-6">
-            <div class="dashboard-card">
+        <!-- Chart and Transactions Section -->
+        <div class="chart-transactions-section">
+            <div class="chart-container">
                 <h5>Financial Overview</h5>
-                <div class="chart-container">
-                    <p>TASK NO 4: ***Please add some charts here everyone!***</p>
-                </div>
+                <MudPaper Class="pa-4">
+                    <MudChart ChartType="ChartType.Pie" InputData="@chartData" InputLabels="@chartLabels" Width="300px" Height="300px" />
+                </MudPaper>
             </div>
-        </div>
-        <div class="col-md-6">
-            <div class="dashboard-card">
+
+            <div class="transactions-container">
                 <h5>Top Transactions</h5>
-                @*TASK NO 3: Need From and to dates selector to filter data in transactions to show below*@
-                <div class="transaction-list">
-                    @foreach (var transaction in transactions)
-                    {
-                        <div class="transaction-item">
-                            <span>@transaction.Description</span>
-                            <span>@transaction.Date.ToString("yyyy-MM-dd")</span>
-                            <span>@transaction.Amount.ToString()</span>
-                            <span class="@(transaction.Type == "Income" ? "text-success" : "text-danger")">@transaction.Type</span>
-                        </div>
-                    }
-                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var transaction in transactions.Take(5))
+                        {
+                            <tr>
+                                <td>@transaction.Description</td>
+                                <td>@transaction.Date.ToString("yyyy-MM-dd")</td>
+                                <td>@transaction.Amount</td>
+                                <td>@transaction.Type</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <button class="btn btn-primary mt-3" @onclick="AddTransaction">Add Transaction</button>
             </div>
         </div>
     </div>
 </div>
 
-@* Modal for Adding Transaction *@
-@if (showModal)
-{
-    <div class="modal fade show d-block" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add Transaction</h5>
-                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label>Description</label>
-                        <input type="text" class="form-control" @bind="newTransaction.Description" />
-                    </div>
-                    <div class="mb-3">
-                        <label>Date</label>
-                        <input type="date" class="form-control" @bind="newTransaction.Date" />
-                    </div>
-                    <div class="mb-3">
-                        <label>Amount</label>
-                        <input type="number" class="form-control" @bind="newTransaction.Amount" />
-                    </div>
-                    <div class="mb-3">
-                        <label>Type</label>
-                        <select class="form-control" @bind="newTransaction.Type">
-                            <option value=""></option>
-                            <option value="Income">Income</option>
-                            <option value="Expense">Expense</option>
-                            <option value="Debt">Debt</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Close</button>
-                    <button type="button" class="btn btn-primary" @onclick="AddTransaction">Add</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="modal-backdrop fade show"></div>
-}
+<style>
+    .dashboard-wrapper {
+        display: flex;
+        min-height: 100vh;
+        background-color: #f8f9fa;
+    }
+
+    .sidebar {
+        width: 220px;
+        padding: 20px;
+        background-color: #2C8377;
+        color: white;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .dashboard-content {
+        flex: 1;
+        padding: 20px;
+    }
+
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .card-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+    }
+
+    .dashboard-card {
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    .chart-transactions-section {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 30px;
+        gap: 20px;
+    }
+
+    .chart-container {
+        flex: 1;
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    .transactions-container {
+        flex: 1;
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .table th, .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .table th {
+            background-color: #f2f2f2;
+        }
+
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        background-color: #007bff;
+        color: white;
+        cursor: pointer;
+    }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+</style>
 
 

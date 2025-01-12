@@ -1,15 +1,11 @@
-﻿using SmartMove.Common;
+﻿using SmartMove.Abstraction;
+using SmartMove.Common;
 using SmartMove.Model;
 using SmartMove.Service.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SmartMove.Service
 {
-    public class UserService : DbInitialize, IUserInterface
+    public class UserService : UserBase, IUserInterface
     {
         private List<User> _User;
 

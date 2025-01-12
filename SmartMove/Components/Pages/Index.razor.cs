@@ -4,7 +4,7 @@ namespace SmartMove.Components.Pages
     {
         protected override void OnInitialized()
         {
-            Nav.NavigateTo("/dashboard");
+            Nav.NavigateTo("/login");
         }
     }
 }

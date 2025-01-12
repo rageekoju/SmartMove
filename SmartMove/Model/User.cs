@@ -1,4 +1,4 @@
-﻿using SmartMove.Common;
+﻿using SmartMove.Abstraction;
 
 namespace SmartMove.Model
 {
