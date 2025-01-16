@@ -1,6 +1,4 @@
-﻿using SmartMove.Abstraction;
-
-namespace SmartMove.Model
+﻿namespace SmartMove.Model
 {
     public class User
     {
@@ -11,5 +9,12 @@ namespace SmartMove.Model
         public string Password { get; set; }
 
         public Currency Currency { get; set; }
+
+        // This method returns the symbol for the selected currency
+        public string GetCurrencySymbol()
+        {
+            return Currency.GetSymbol();
+        }
     }
+
 }

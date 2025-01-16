@@ -1,48 +1,56 @@
-using SmartMove.Abstraction;
 using SmartMove.Model;
-using SmartMove.Service;
 
 namespace SmartMove.Components.Pages
 {
     public partial class Transactions
     {
-        private List<Transaction> transactions = new();
+        private List<Transaction> DisplayedTransactions = new();
+        private List<string> AllTags = new();
         private Transaction Transaction = new();
-        private bool EditMode = false;
         private string TagsInput = "";
+        private bool EditMode = false;
+
+        private string SearchTerm = "";
+        private string SelectedType = "All";
+        private string SelectedTag = "All";
+        private DateTime? StartDate = null;
+        private DateTime? EndDate = null;
 
         protected override async Task OnInitializedAsync()
         {
-            await LoadTransactions();
+            await LoadTransactionsAsync();
         }
 
-        private async Task LoadTransactions()
+        private async Task LoadTransactionsAsync()
         {
-            transactions = TransactionService.GetAllTransactions();
+            DisplayedTransactions = await TransactionService.GetAllTransactionsAsync();
+            AllTags = DisplayedTransactions
+                .SelectMany(t => t.Tags ?? new List<string>())
+                .Distinct()
+                .ToList();
         }
 
         private async Task HandleSubmit()
         {
-            // Parse tags input
-            Transaction.Tags = TagsInput.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                        .Select(tag => tag.Trim())
-                                        .ToList();
+            Transaction.Tags = TagsInput
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(tag => tag.Trim())
+                .ToList();
 
             if (EditMode)
             {
-                await TransactionService.UpdateTransaction(Transaction);
+                await TransactionService.UpdateTransactionAsync(Transaction);
             }
             else
             {
-                await TransactionService.CreateTransaction(Transaction);
+                await TransactionService.CreateTransactionAsync(Transaction);
             }
 
-            // Refresh the transaction list and reset form
-            await LoadTransactions();
+            await LoadTransactionsAsync();
             ResetForm();
         }
 
-        private void EditTransaction(Transaction transaction)
+        private void UpdateTransaction(Transaction transaction)
         {
             Transaction = new Transaction
             {
@@ -51,17 +59,17 @@ namespace SmartMove.Components.Pages
                 Amount = transaction.Amount,
                 Type = transaction.Type,
                 Date = transaction.Date,
-                Tags = new List<string>(transaction.Tags)
+                Tags = new List<string>(transaction.Tags ?? new List<string>())
             };
 
-            TagsInput = string.Join(", ", transaction.Tags);
+            TagsInput = string.Join(", ", transaction.Tags ?? new List<string>());
             EditMode = true;
         }
 
         private async Task DeleteTransaction(int id)
         {
-            await TransactionService.DeleteTransaction(id);
-            await LoadTransactions();
+            await TransactionService.DeleteTransactionAsync(id);
+            await LoadTransactionsAsync();
         }
 
         private void ResetForm()
@@ -70,5 +78,14 @@ namespace SmartMove.Components.Pages
             TagsInput = "";
             EditMode = false;
         }
+        private void ExportTransactions()
+        {
+            // Add logic to export transactions
+            Console.WriteLine("Exporting transactions...");
+        }
+        private async Task SearchTransactions()
+        {
+            DisplayedTransactions = await TransactionService.SearchTransactionsAsync(SearchTerm, SelectedType, SelectedTag, EndDate);
+        }
     }
-}
+    }

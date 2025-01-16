@@ -2,69 +2,77 @@ namespace SmartMove.Components.Pages
 {
     public partial class Dashboard
     {
-        private Transaction newTransaction = new Transaction();
-        private decimal totalIncome = 0;
-        private decimal totalExpense = 0;
-        private decimal totalDebt = 0;
-        private decimal clearedDebts = 0;
-        private decimal pendingDebts = 0;
+        private decimal TotalInflows;
+        private decimal TotalOutflows;
+        private decimal TotalDebt;
+        private decimal ClearedDebt;
+        private decimal PendingDebt;
+        private decimal AvailableBalance;
+        private List<Transaction> TopTransactions = new();
+        private List<Transaction> PendingDebts = new();
+        private DateTime? StartDate;
+        private DateTime? EndDate;
 
-        private List<Transaction> transactions = new List<Transaction>
-    {
-        new Transaction { Description = "Salary", Date = DateTime.Now, Amount = 50000, Type = "Income" },
-        new Transaction { Description = "Grocery", Date = DateTime.Now, Amount = 10000, Type = "Expense" },
-        new Transaction { Description = "Loan", Date = DateTime.Now, Amount = 20000, Type = "Debt" },
-        new Transaction { Description = "Debt Paid", Date = DateTime.Now, Amount = 10000, Type = "Cleared Debt" }
-    };
-
-        private double[] chartData = { 50, 30, 20 };
-        private string[] chartLabels = { "Income", "Expense", "Debt" };
-
-        protected override void OnInitialized()
+        protected override async Task OnInitializedAsync()
         {
-            CalculateTotals();
+            await LoadDashboardData();
         }
 
-        private void AddTransaction()
+        private async Task LoadDashboardData()
         {
-            transactions.Add(new Transaction
+            var dashboardData = await TransactionService.GetDashboardDataAsync();
+            TotalInflows = dashboardData["Total Inflows"];
+            TotalOutflows = dashboardData["Total Outflows"];
+            ClearedDebt = dashboardData["Cleared Debt"];
+            PendingDebt = dashboardData["Pending Debt"];
+            TotalDebt = dashboardData["Total Debt"];
+            AvailableBalance = TotalInflows - TotalOutflows - ClearedDebt;
+
+            TopTransactions = await TransactionService.GetTopTransactionsAsync(true);
+            PendingDebts = (await TransactionService.GetAllTransactionsAsync()).Where(t => t.Type == "Pending Debt").ToList();
+        }
+
+        private async Task FilterTransactions()
+        {
+            if (StartDate.HasValue && EndDate.HasValue)
             {
-                Description = newTransaction.Description,
-                Date = newTransaction.Date == default ? DateTime.Now : newTransaction.Date,
-                Amount = newTransaction.Amount,
-                Type = newTransaction.Type
-            });
-
-            CalculateTotals();
-            UpdateChartData();
-            newTransaction = new Transaction();
+                var filteredTransactions = await TransactionService.GetFilteredTransactionsAsync(StartDate.Value, EndDate.Value);
+                TopTransactions = filteredTransactions.OrderByDescending(t => t.Amount).Take(5).ToList();
+            }
         }
 
-        private void CalculateTotals()
+        private int Index = -1; //default value cannot be 0 -> first selectedindex is 0.
+        int dataSize = 5;
+        double[] data = { 40, 30, 15, 10, 5 }; // These represent Inflows, Outflows, Debt, Cleared Debt, and Pending Debt
+        string[] labels = { "Inflows", "Outflows", "Debt", "Cleared Debt", "Pending Debt" }; // Labels corresponding to the categories
+        string[] colors = { "#cb997e", "#ddbea9", "#ffe8d6", "#b7b7a4", "#a5a58d" }; // Colors for each category
+
+        Random random = new Random();
+
+        void RandomizeData()
         {
-            totalIncome = transactions.Where(t => t.Type == "Income").Sum(t => t.Amount);
-            totalExpense = transactions.Where(t => t.Type == "Expense").Sum(t => t.Amount);
-            totalDebt = transactions.Where(t => t.Type == "Debt").Sum(t => t.Amount);
-            clearedDebts = transactions.Where(t => t.Type == "Cleared Debt").Sum(t => t.Amount);
-            pendingDebts = totalDebt - clearedDebts;
+            var new_data = new double[dataSize];
+            for (int i = 0; i < new_data.Length; i++)
+                new_data[i] = random.NextDouble() * 100;
+            data = new_data;
+            StateHasChanged();
         }
 
-        private void UpdateChartData()
+        void AddDataSize()
         {
-            chartData = new double[]
+            if (dataSize < 20)
             {
-            (double)totalIncome,
-            (double)totalExpense,
-            (double)totalDebt
-            };
+                dataSize = dataSize + 1;
+                RandomizeData();
+            }
         }
-
-        public class Transaction
+        void RemoveDataSize()
         {
-            public string Description { get; set; }
-            public DateTime Date { get; set; }
-            public decimal Amount { get; set; }
-            public string Type { get; set; }
+            if (dataSize > 0)
+            {
+                dataSize = dataSize - 1;
+                RandomizeData();
+            }
         }
     }
 }

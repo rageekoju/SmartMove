@@ -1,7 +1,7 @@
 ﻿using System.Text.Json; // Provides functionality for JSON serialization and deserialization
 using SmartMove.Model;
 
-namespace SmartMove.Common;
+namespace SmartMove.Abstraction;
 
 // Abstract base class to manage user-related operations (e.g., loading and saving user data)
 public abstract class UserBase

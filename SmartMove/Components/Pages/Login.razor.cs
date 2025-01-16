@@ -13,7 +13,7 @@ namespace SmartMove.Components.Pages
         {
             if (UserInterface.Login(user))
             {
-                Nav.NavigateTo("/dashboard");
+                Nav.NavigateTo("/login");
             }
             else
             {

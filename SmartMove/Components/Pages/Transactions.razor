@@ -1,75 +1,129 @@
 ﻿@page "/transactions"
-@using SmartMove.Abstraction
-@inject TransactionService TransactionService
+@using SmartMove.Model
 
-
-<div class="container">
-    <h2>Transaction List</h2>
-
-    <!-- Display Transactions -->
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Amount</th>
-                <th>Type</th>
-                <th>Date</th>
-                <th>Tags</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            @foreach (var transaction in transactions)
-            {
-                <tr>
-                    <td>@transaction.Id</td>
-                    <td>@transaction.Title</td>
-                    <td>@transaction.Amount</td>
-                    <td>@transaction.Type</td>
-                    <td>@transaction.Date.ToString("yyyy-MM-dd")</td>
-                    <td>@string.Join(", ", transaction.Tags)</td>
-                    <td>
-                        <button class="btn btn-primary" @onclick="() => EditTransaction(transaction)">Edit</button>
-                        <button class="btn btn-danger" @onclick="() => DeleteTransaction(transaction.Id)">Delete</button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-
-    <h3>@(EditMode ? "Edit Transaction" : "Add Transaction")</h3>
-
-    <!-- Add/Edit Transaction Form -->
-    <form @onsubmit="HandleSubmit">
-        <div class="form-group">
-            <label for="title">Title:</label>
-            <input type="text" id="title" class="form-control" @bind="Transaction.Title" required />
+<!-- Main Page Layout -->
+<div style="display: flex; height: 100vh;">
+    <!-- Sidebar -->
+    <div style="width: 250px; background-color: #4DA6A6; color: #fff; padding: 20px; flex-shrink: 0; height: 100vh; position: fixed;">
+        <div style="font-size: 24px; font-weight: bold; margin-bottom: 20px;">
+            Move Smart<br />
+            <span style="font-size: 16px; font-weight: normal;">Spend Smarter</span>
         </div>
-        <div class="form-group">
-            <label for="amount">Amount:</label>
-            <input type="number" id="amount" class="form-control" @bind="Transaction.Amount" required />
+        <div style="margin: 20px 0;">
+            <a href="/dashboard" style="display: block; padding: 10px; color: #fff; text-decoration: none; font-size: 18px; border-radius: 5px;">Dashboard</a>
+            <a href="/transactions" style="display: block; padding: 10px; color: #fff; text-decoration: none; font-size: 18px; border-radius: 5px; margin-top: 10px;">Transaction</a>
+            <a href="/debts" style="display: block; padding: 10px; color: #fff; text-decoration: none; font-size: 18px; border-radius: 5px; margin-top: 10px;">Debts</a>
+            <a href="/reports" style="display: block; padding: 10px; color: #fff; text-decoration: none; font-size: 18px; border-radius: 5px; margin-top: 10px;">Reports</a>
+            <a href="/profile" style="display: block; padding: 10px; color: #fff; text-decoration: none; font-size: 18px; border-radius: 5px; margin-top: 10px;">My Profile</a>
         </div>
-        <div class="form-group">
-            <label for="type">Type:</label>
-            <select id="type" class="form-control" @bind="Transaction.Type">
-                <option>Credit</option>
-                <option>Debit</option>
+    </div>
+
+    <!-- Main Content Area -->
+    <div style="margin-left: 250px; padding: 20px; width: 100%; overflow-y: auto;">
+        <h3 style="text-align: center; margin-top: 20px;">Transactions</h3>
+
+        <!-- Transaction Search -->
+        <div style="margin-bottom: 20px; text-align: center;">
+            <input @bind="SearchTerm" placeholder="Search by title" style="padding: 8px; margin-right: 10px; border: 1px solid #ccc; border-radius: 5px;" />
+            <select @bind="SelectedType" style="padding: 8px; margin-right: 10px; border: 1px solid #ccc; border-radius: 5px;">
+                <option value="All">All Types</option>
+                <option value="Debit">Debit</option>
+                <option value="Credit">Credit</option>
+                <option value="Cleared Debt">Cleared Debt</option>
+                <option value="Pending Debt">Pending Debt</option>
             </select>
+            <select @bind="SelectedTag" style="padding: 8px; margin-right: 10px; border: 1px solid #ccc; border-radius: 5px;">
+                <option value="All">All Tags</option>
+                @foreach (var tag in AllTags)
+                {
+                    <option value="@tag">@tag</option>
+                }
+            </select>
+            <input type="date" @bind="StartDate" style="padding: 8px; margin-right: 10px; border: 1px solid #ccc; border-radius: 5px;" />
+            <input type="date" @bind="EndDate" style="padding: 8px; margin-right: 10px; border: 1px solid #ccc; border-radius: 5px;" />
+            <button @onclick="SearchTransactions" style="padding: 10px 20px; background-color: #007BFF; color: white; border: none; border-radius: 5px; cursor: pointer;">Search</button>
         </div>
-        <div class="form-group">
-            <label for="date">Date:</label>
-            <input type="date" id="date" class="form-control" @bind="Transaction.Date" required />
+
+        <!-- Transaction Form -->
+        <div style="width: 60%; margin: 20px auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+            <h4 style="text-align: center;">Add / Edit Transaction</h4>
+            <EditForm Model="Transaction" OnValidSubmit="HandleSubmit">
+                <div style="margin-bottom: 15px;">
+                    <label>Title:</label><br />
+                    <input @bind="Transaction.Title" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label>Amount:</label><br />
+                    <input type="number" @bind="Transaction.Amount" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label>Type:</label><br />
+                    <select @bind="Transaction.Type" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+                        <option value="">Select Type</option>
+                        <option value="Debit">Debit</option>
+                        <option value="Credit">Credit</option>
+                        <option value="Cleared Debt">Cleared Debt</option>
+                        <option value="Pending Debt">Pending Debt</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label>Date:</label><br />
+                    <input type="date" @bind="Transaction.Date" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label>Tags (comma-separated):</label><br />
+                    <input @bind="TagsInput" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
+                </div>
+                <button type="submit" style="width: 100%; padding: 10px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    @((EditMode ? "Update" : "Add") + " Transaction")
+                </button>
+                <button type="button" @onclick="ResetForm" style="width: 100%; padding: 10px; margin-top: 10px; background-color: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">Reset</button>
+            </EditForm>
         </div>
-        <div class="form-group">
-            <label for="tags">Tags (comma-separated):</label>
-            <input type="text" id="tags" class="form-control" @bind="@TagsInput" />
-        </div>
-        <button type="submit" class="btn btn-success">@(EditMode ? "Update" : "Add")</button>
-        <button class="btn btn-primary mt-3" @onclick="HandleSubmit">Add Transaction</button>
-        <button type="button" class="btn btn-secondary" @onclick="ResetForm">Cancel</button>
-    </form>
+
+        <!-- Transactions List -->
+        <table style="width: 80%; margin: 20px auto; border-collapse: collapse;">
+            <thead>
+                <tr style="background-color: #f8f9fa; text-align: left;">
+                    <th style="padding: 10px; border: 1px solid #ddd;">Title</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">Amount</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">Type</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">Date</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">Tags</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (DisplayedTransactions.Any())
+                {
+                    @foreach (var transaction in DisplayedTransactions)
+                    {
+                        <tr style="background-color: @(transaction.Type switch {
+                            "Debit" => "white",
+                            "Credit" => "white",
+                            "Cleared Debt" => "white",
+                            "Pending Debt" => "white",
+                            _ => "white"
+                        })">
+                            <td style="padding: 10px; border: 1px solid #ddd;">@transaction.Title</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">@transaction.Amount</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">@transaction.Type</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">@transaction.Date.ToShortDateString()</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">@string.Join(", ", transaction.Tags ?? new List<string>())</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">
+                                <button @onclick="() => UpdateTransaction(transaction)" style="background-color: #007BFF; color: white; border: none; border-radius: 5px; cursor: pointer;">Edit</button>
+                                <button @onclick="() => DeleteTransaction(transaction.Id)" style="background-color: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">Delete</button>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" style="padding: 10px; text-align: center;">No transactions found.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>
-
-

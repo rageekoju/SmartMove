@@ -1,5 +1,4 @@
 ﻿using SmartMove.Abstraction;
-using SmartMove.Common;
 using SmartMove.Model;
 using SmartMove.Service.Interface;
 
