@@ -1,53 +1,62 @@
 ﻿@page "/transactions"
 @using SmartMove.Model
 
-<!-- Main Page Layout -->
+<!-- Main Page Layout: Transaction Management Interface -->
 <div style="display: flex; height: 100vh;">
-    <!-- Sidebar -->
+    <!-- Sidebar: Navigation Links for Dashboard and Transactions -->
     <div style="width: 250px; background-color: #4DA6A6; color: #fff; padding: 20px; flex-shrink: 0; height: 100vh; position: fixed;">
         <div style="font-size: 24px; font-weight: bold; margin-bottom: 20px;">
             Move Smart<br />
             <span style="font-size: 16px; font-weight: normal;">Spend Smarter</span>
         </div>
         <div style="margin: 20px 0;">
+            <!-- Sidebar Links -->
             <a href="/dashboard" style="display: block; padding: 10px; color: #fff; text-decoration: none; font-size: 18px; border-radius: 5px;">Dashboard</a>
             <a href="/transactions" style="display: block; padding: 10px; color: #fff; text-decoration: none; font-size: 18px; border-radius: 5px; margin-top: 10px;">Transaction</a>
-            <a href="/debts" style="display: block; padding: 10px; color: #fff; text-decoration: none; font-size: 18px; border-radius: 5px; margin-top: 10px;">Debts</a>
-            <a href="/reports" style="display: block; padding: 10px; color: #fff; text-decoration: none; font-size: 18px; border-radius: 5px; margin-top: 10px;">Reports</a>
-            <a href="/profile" style="display: block; padding: 10px; color: #fff; text-decoration: none; font-size: 18px; border-radius: 5px; margin-top: 10px;">My Profile</a>
         </div>
     </div>
 
-    <!-- Main Content Area -->
+    <!-- Main Content Area: Includes Transaction Search and Transaction Form -->
     <div style="margin-left: 250px; padding: 20px; width: 100%; overflow-y: auto;">
         <h3 style="text-align: center; margin-top: 20px;">Transactions</h3>
 
-        <!-- Transaction Search -->
+        <!-- Transaction Search Filters -->
         <div style="margin-bottom: 20px; text-align: center;">
-            <input @bind="SearchTerm" placeholder="Search by title" style="padding: 8px; margin-right: 10px; border: 1px solid #ccc; border-radius: 5px;" />
-            <select @bind="SelectedType" style="padding: 8px; margin-right: 10px; border: 1px solid #ccc; border-radius: 5px;">
-                <option value="All">All Types</option>
-                <option value="Debit">Debit</option>
-                <option value="Credit">Credit</option>
-                <option value="Cleared Debt">Cleared Debt</option>
-                <option value="Pending Debt">Pending Debt</option>
-            </select>
-            <select @bind="SelectedTag" style="padding: 8px; margin-right: 10px; border: 1px solid #ccc; border-radius: 5px;">
-                <option value="All">All Tags</option>
-                @foreach (var tag in AllTags)
-                {
-                    <option value="@tag">@tag</option>
-                }
-            </select>
-            <input type="date" @bind="StartDate" style="padding: 8px; margin-right: 10px; border: 1px solid #ccc; border-radius: 5px;" />
-            <input type="date" @bind="EndDate" style="padding: 8px; margin-right: 10px; border: 1px solid #ccc; border-radius: 5px;" />
-            <button @onclick="SearchTransactions" style="padding: 10px 20px; background-color: #007BFF; color: white; border: none; border-radius: 5px; cursor: pointer;">Search</button>
+            <!-- Search and Filter Options for Transactions -->
+            <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 10px;">
+                <input @bind="SearchTerm" placeholder="Search by title" style="padding: 8px; border: 1px solid #ccc; border-radius: 5px;" />
+                <select @bind="SelectedType" style="padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+                    <option value="All">All Types</option>
+                    <option value="Debit">Debit</option>
+                    <option value="Credit">Credit</option>
+                    <option value="Cleared Debt">Cleared Debt</option>
+                    <option value="Pending Debt">Pending Debt</option>
+                </select>
+                <select @bind="SelectedDefaultTag" style="padding: 8px; border: 1px solid #ccc; border-radius: 5px;">
+                    <option value="All">All Tags</option>
+                    @foreach (var tag in DefaultTags)
+                    {
+                        <option value="@tag">@tag</option>
+                    }
+                </select>
+                <input @bind="CustomTagInput" placeholder="Search by Custom Tag" style="padding: 8px; border: 1px solid #ccc; border-radius: 5px;" />
+            </div>
+
+            <!-- Date Range Filters and Search Button -->
+            <div class="filter" style="margin-bottom: 20px; padding: 15px;">
+                <div style="display: flex; justify-content: center; gap: 15px;">
+                    <label>Start Date: <input type="date" @bind="StartDate" style="padding: 5px;" /></label>
+                    <label>End Date: <input type="date" @bind="EndDate" style="padding: 5px;" /></label>
+                    <button @onclick="SearchTransactions" style="padding: 8px 15px; border: none; border-radius: 5px; background-color: #4DA6A6; color: white; cursor: pointer;">Search</button>
+                </div>
+            </div>
         </div>
 
-        <!-- Transaction Form -->
-        <div style="width: 60%; margin: 20px auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
-            <h4 style="text-align: center;">Add / Edit Transaction</h4>
+        <!-- Transaction Form: Allows for adding/editing transaction data -->
+        <div style="width: 90%; margin: 20px auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+            <h4 style="text-align: center;">Transaction Form</h4>
             <EditForm Model="Transaction" OnValidSubmit="HandleSubmit">
+                <!-- Input Fields for Title, Amount, Type, Date, Tags, and Notes -->
                 <div style="margin-bottom: 15px;">
                     <label>Title:</label><br />
                     <input @bind="Transaction.Title" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
@@ -74,15 +83,19 @@
                     <label>Tags (comma-separated):</label><br />
                     <input @bind="TagsInput" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
                 </div>
-                <button type="submit" style="width: 100%; padding: 10px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                <div style="margin-bottom: 15px;">
+                    <label>Notes(Optional):</label><br />
+                    <input @bind="Transaction.Notes" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" />
+                </div>
+                <button type="submit" style="width: 100%; padding: 10px; background-color: #4DA6A6; color: white; border: none; border-radius: 5px; cursor: pointer;">
                     @((EditMode ? "Update" : "Add") + " Transaction")
                 </button>
                 <button type="button" @onclick="ResetForm" style="width: 100%; padding: 10px; margin-top: 10px; background-color: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">Reset</button>
             </EditForm>
         </div>
 
-        <!-- Transactions List -->
-        <table style="width: 80%; margin: 20px auto; border-collapse: collapse;">
+        <!-- Transactions List: Displays a table of transactions -->
+        <table style="width: 90%; margin: 20px auto; border-collapse: collapse;">
             <thead>
                 <tr style="background-color: #f8f9fa; text-align: left;">
                     <th style="padding: 10px; border: 1px solid #ddd;">Title</th>
@@ -90,10 +103,12 @@
                     <th style="padding: 10px; border: 1px solid #ddd;">Type</th>
                     <th style="padding: 10px; border: 1px solid #ddd;">Date</th>
                     <th style="padding: 10px; border: 1px solid #ddd;">Tags</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">Notes</th>
                     <th style="padding: 10px; border: 1px solid #ddd;">Actions</th>
                 </tr>
             </thead>
             <tbody>
+                <!-- Loop Through Transactions and Display Data -->
                 @if (DisplayedTransactions.Any())
                 {
                     @foreach (var transaction in DisplayedTransactions)
@@ -110,9 +125,11 @@
                             <td style="padding: 10px; border: 1px solid #ddd;">@transaction.Type</td>
                             <td style="padding: 10px; border: 1px solid #ddd;">@transaction.Date.ToShortDateString()</td>
                             <td style="padding: 10px; border: 1px solid #ddd;">@string.Join(", ", transaction.Tags ?? new List<string>())</td>
-                            <td style="padding: 10px; border: 1px solid #ddd;">
-                                <button @onclick="() => UpdateTransaction(transaction)" style="background-color: #007BFF; color: white; border: none; border-radius: 5px; cursor: pointer;">Edit</button>
-                                <button @onclick="() => DeleteTransaction(transaction.Id)" style="background-color: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">Delete</button>
+                            <td style="padding: 10px; border: 1px solid #ddd;">@transaction.Notes</td>
+                            <td style="padding: 10px; border: 1px solid #ddd; display: flex; justify-content: space-between;">
+                                <!-- Update/Delete Buttons -->
+                                <button @onclick="() => UpdateTransaction(transaction)" style="background-color: #4DA6A6; color: white; border: none; border-radius: 5px; cursor: pointer; padding: 8px 15px;">Update</button>
+                                <button @onclick="() => DeleteTransaction(transaction.Id)" style="background-color: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; padding: 8px 15px;">Delete</button>
                             </td>
                         </tr>
                     }

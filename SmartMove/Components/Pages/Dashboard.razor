@@ -1,122 +1,129 @@
 ﻿@page "/dashboard"
-@inject TransactionService TransactionService
 
-<!-- Sidebar -->
+<!-- Sidebar: Navigation Links for Dashboard and Transactions -->
 <div style="width: 250px; background-color: #4DA6A6; color: #fff; padding: 20px; flex-shrink: 0; height: 100vh; position: fixed;">
+    <!-- Branding Section -->
     <div style="font-size: 24px; font-weight: bold; margin-bottom: 20px;">
         Move Smart<br />
         <span style="font-size: 16px; font-weight: normal;">Spend Smarter</span>
     </div>
+
+    <!-- Sidebar Navigation Links -->
     <div style="margin: 20px 0;">
         <a href="/dashboard" style="display: block; padding: 10px; color: #fff; text-decoration: none; font-size: 18px; border-radius: 5px;">Dashboard</a>
         <a href="/transactions" style="display: block; padding: 10px; color: #fff; text-decoration: none; font-size: 18px; border-radius: 5px; margin-top: 10px;">Transaction</a>
-        <a href="/debts" style="display: block; padding: 10px; color: #fff; text-decoration: none; font-size: 18px; border-radius: 5px; margin-top: 10px;">Debts</a>
-        <a href="/reports" style="display: block; padding: 10px; color: #fff; text-decoration: none; font-size: 18px; border-radius: 5px; margin-top: 10px;">Reports</a>
-        <a href="/profile" style="display: block; padding: 10px; color: #fff; text-decoration: none; font-size: 18px; border-radius: 5px; margin-top: 10px;">My Profile</a>
     </div>
 </div>
 
+<!-- Main Content Area -->
 <div style="margin-left: 270px; padding: 20px;">
-    <!-- Available Balance -->
-    <div style="font-size: 24px; font-weight: bold; text-align: center; margin-bottom: 20px;">
-        Available Balance: <span style="color: #28a745;">@AvailableBalance</span>
-    </div>
+    <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
 
-    <!-- Date Range Filter -->
-    <div class="filter" style="text-align: center; margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px;">
-        <h4 style="margin-bottom: 10px;">Filter Transactions</h4>
-        <div style="display: flex; justify-content: center; gap: 15px;">
-            <label>Start Date: <input type="date" @bind="StartDate" style="padding: 5px;" /></label>
-            <label>End Date: <input type="date" @bind="EndDate" style="padding: 5px;" /></label>
+        <!-- Greetings Section -->
+        <div style="font-size: 28px; font-weight: bold; margin-bottom: 20px;">
+            Welcome back, Ragee Koju!
         </div>
-        <div style="margin-top: 10px;">
-            <button @onclick="FilterTransactions" style="padding: 8px 15px; border: none; border-radius: 5px; background-color: #28a745; color: white; cursor: pointer;">Filter</button>
+
+        <!-- Available Balance Display -->
+        <div style="font-size: 24px; font-weight: bold; margin-bottom: 20px;">
+            Available Balance: <span style="color: #4DA6A6;">@AvailableBalance</span>
         </div>
-    </div>
 
-    <!-- Statistics -->
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
-        <div style="padding: 15px; border: 1px solid #ccc; border-radius: 5px; text-align: center; background-color: #D1C4E9;">
-            <h4>Total Inflows</h4>
-            <p>@TotalInflows</p>
+        <!-- Date Range Filter for Transaction History -->
+        <div class="filter" style="margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px;">
+            <h4 style="margin-bottom: 10px;">Search Transaction History</h4>
+            <div style="display: flex; justify-content: center; gap: 15px;">
+                <label>Start Date: <input type="date" @bind="StartDate" style="padding: 5px;" /></label>
+                <label>End Date: <input type="date" @bind="EndDate" style="padding: 5px;" /></label>
+                <button @onclick="FilterTransactions" style="padding: 8px 15px; border: none; border-radius: 5px; background-color: #4DA6A6; color: white; cursor: pointer;">Search</button>
+            </div>
         </div>
-        <div style="padding: 15px; border: 1px solid #ccc; border-radius: 5px; text-align: center; background-color: #FF7043;">
-            <h4>Total Outflows</h4>
-            <p>@TotalOutflows</p>
+
+        <!-- Financial Statistics -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+            <div style="padding: 15px; border: 1px solid #ccc; border-radius: 5px; text-align: center; background-color: #D1C4E9;">
+                <h4>Total Inflows</h4>
+                <p>@TotalInflows</p>
+            </div>
+            <div style="padding: 15px; border: 1px solid #ccc; border-radius: 5px; text-align: center; background-color: #FF7043;">
+                <h4>Total Outflows</h4>
+                <p>@TotalOutflows</p>
+            </div>
+            <div style="padding: 15px; border: 1px solid #ccc; border-radius: 5px; text-align: center; background-color: #FFCC80;">
+                <h4>Total Debt</h4>
+                <p>@TotalDebt</p>
+            </div>
         </div>
-        <div style="padding: 15px; border: 1px solid #ccc; border-radius: 5px; text-align: center; background-color: #FFCC80;">
-            <h4>Total Debt</h4>
-            <p>@TotalDebt</p>
+
+        <!-- Debt Status Overview -->
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;">
+            <div style="padding: 15px; border: 1px solid #ccc; border-radius: 5px; text-align: center; background-color: #F48FB1;">
+                <h4>Cleared Debt</h4>
+                <p>@ClearedDebt</p>
+            </div>
+            <div style="padding: 15px; border: 1px solid #ccc; border-radius: 5px; text-align: center; background-color: #e0f7fa;">
+                <h4>Pending Debt</h4>
+                <p>@PendingDebt</p>
+            </div>
         </div>
-    </div>
 
-    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;">
-        <div style="padding: 15px; border: 1px solid #ccc; border-radius: 5px; text-align: center; background-color: #F48FB1;">
-            <h4>Cleared Debt</h4>
-            <p>@ClearedDebt</p>
-        </div>
-        <div style="padding: 15px; border: 1px solid #ccc; border-radius: 5px; text-align: center; background-color: #e0f7fa;">
-            <h4>Pending Debt</h4>
-            <p>@PendingDebt</p>
-        </div>
-    </div>
-
-
-    <!-- Pending Debts -->
-    <div class="pending-debts" style="margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px;">
-        <h4 style="text-align: center; margin-bottom: 10px;">Pending Debts</h4>
-        <table style="width: 100%; border-collapse: collapse; font-size: 16px;">
-            <thead>
-                <tr style="background-color: #f8f9fa; text-align: left;">
-                    <th style="padding: 10px; border-bottom: 1px solid #ddd;">Description</th>
-                    <th style="padding: 10px; border-bottom: 1px solid #ddd;">Amount</th>
-                    <th style="padding: 10px; border-bottom: 1px solid #ddd;">Due Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var debt in PendingDebts)
-                {
-                    <tr style="background-color: @((PendingDebts.IndexOf(debt) % 2 == 0) ? "#e0f7fa" : "#e0f7fa");">
-                        <td style="padding: 10px; border-bottom: 1px solid #ddd;">@debt.Title</td>
-                        <td style="padding: 10px; border-bottom: 1px solid #ddd;">@debt.Amount</td>
-                        <td style="padding: 10px; border-bottom: 1px solid #ddd;">@debt.Date.ToShortDateString()</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-
-
-    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 20px;">
-        <!-- Chart -->
-        <MudPaper Class="pa-4">
-            <MudChart ChartType="ChartType.Pie" InputData="@data" @bind-SelectedIndex="Index" InputLabels="@labels" Width="300px" Height="300px" />
-        </MudPaper>
-
-        <!-- Top Transactions -->
-        <div class="top-transactions" style="margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px;">
-            <h4 style="text-align: center; margin-bottom: 10px;">Top Transactions</h4>
-            <table style="width: 100%; border-collapse: collapse;">
+        <!-- Pending Debts Table -->
+        <div class="pending-debts" style="margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px; ">
+            <h4 style="margin-bottom: 10px;">Pending Debts</h4>
+            <table style="width: 100%; border-collapse: collapse; font-size: 16px;">
                 <thead>
-                    <tr>
-                        <th style="border: 1px solid #ccc; padding: 8px;">Title</th>
-                        <th style="border: 1px solid #ccc; padding: 8px;">Amount</th>
-                        <th style="border: 1px solid #ccc; padding: 8px;">Type</th>
-                        <th style="border: 1px solid #ccc; padding: 8px;">Date</th>
+                    <tr style="background-color: #f8f9fa; text-align: center;">
+                        <th style="padding: 10px; border-bottom: 1px solid #ddd;">Title</th>
+                        <th style="padding: 10px; border-bottom: 1px solid #ddd;">Amount</th>
+                        <th style="padding: 10px; border-bottom: 1px solid #ddd;">End Date</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var transaction in TopTransactions)
+                    @foreach (var debt in PendingDebts)
                     {
-                        <tr>
-                            <td style="border: 1px solid #ccc; padding: 8px;">@transaction.Title</td>
-                            <td style="border: 1px solid #ccc; padding: 8px;">@transaction.Amount</td>
-                            <td style="border: 1px solid #ccc; padding: 8px;">@transaction.Type</td>
-                            <td style="border: 1px solid #ccc; padding: 8px;">@transaction.Date.ToShortDateString()</td>
+                        <tr style="background-color: @((PendingDebts.IndexOf(debt) % 2 == 0) ? "#e0f7fa" : "#e0f7fa");">
+                            <td style="padding: 10px; border-bottom: 1px solid #ddd;">@debt.Title</td>
+                            <td style="padding: 10px; border-bottom: 1px solid #ddd;">@debt.Amount</td>
+                            <td style="padding: 10px; border-bottom: 1px solid #ddd;">@debt.Date.ToShortDateString()</td>
                         </tr>
                     }
                 </tbody>
             </table>
+        </div>
+
+        <!-- Financial Overview and Top Transactions -->
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 20px;">
+            <!-- Financial Overview Chart -->
+            <MudPaper Class="pa-4">
+                <h4 style="margin-bottom: 10px;">Financial Overview</h4>
+                <MudChart ChartType="ChartType.Pie" InputData="@data" @bind-SelectedIndex="Index" InputLabels="@labels" Width="300px" Height="300px" />
+            </MudPaper>
+
+            <!-- Top Transactions Table -->
+            <div class="top-transactions" style="margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px;">
+                <h4 style="margin-bottom: 10px;">Top Transactions</h4>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th style="border: 1px solid #ccc; padding: 8px;">Title</th>
+                            <th style="border: 1px solid #ccc; padding: 8px;">Amount</th>
+                            <th style="border: 1px solid #ccc; padding: 8px;">Type</th>
+                            <th style="border: 1px solid #ccc; padding: 8px;">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var transaction in TopTransactions)
+                        {
+                            <tr>
+                                <td style="border: 1px solid #ccc; padding: 8px;">@transaction.Title</td>
+                                <td style="border: 1px solid #ccc; padding: 8px;">@transaction.Amount</td>
+                                <td style="border: 1px solid #ccc; padding: 8px;">@transaction.Type</td>
+                                <td style="border: 1px solid #ccc; padding: 8px;">@transaction.Date.ToShortDateString()</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

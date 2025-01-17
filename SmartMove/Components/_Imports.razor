@@ -11,8 +11,9 @@
 @using SmartMove.Service.Interface
 @using SmartMove.Service
 
-@inject NavigationManager Nav
+// Injecting required services to manage navigation, transactions, and user interface interactions
+@inject NavigationManager Nav // Handles navigation between pages
+@inject TransactionService TransactionService // Service for retrieving transactions
+@inject IUserInterface UserInterface // Interface for managing UI-related functionalities
 
-@inject TransactionService TransactionService
-@inject IUserInterface UserInterface
 

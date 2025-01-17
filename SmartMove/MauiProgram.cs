@@ -23,9 +23,15 @@ namespace SmartMove
 #if DEBUG
     		builder.Services.AddBlazorWebViewDeveloperTools();
     		builder.Logging.AddDebug();
+            // Adding MudBlazor services for UI components and styling  
             builder.Services.AddMudServices();
+
+            // Registering IUserInterface with its implementation (UserService) to manage UI-related functionalities  
             builder.Services.AddScoped<IUserInterface, UserService>();
-            builder.Services.AddScoped < TransactionService>();
+
+            // Registering TransactionService as a scoped service to handle transaction-related operations  
+            builder.Services.AddScoped<TransactionService>();
+
 
 #endif
 
