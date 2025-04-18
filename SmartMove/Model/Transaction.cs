@@ -13,7 +13,7 @@
     public string Type { get; set; }
 
     // Date when the transaction took place
-    public DateTime Date { get; set; }
+    public DateTime Date { get; set; } = DateTime.Today;
 
     // List of tags to categorize or label the transaction 
     // Ensured to be initialized to avoid null reference exceptions
